@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/help_screen_back_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="start"
+            android:padding="10dp"
+            android:textSize="28sp"
+            android:text="@string/help_text_back"/>
+        <TextView
+            android:id="@+id/help_screen_next_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:padding="10dp"
+            android:textSize="28sp"
+            android:text="@string/help_text_next"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/help_screen_page_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="10dp"
+        android:text="@string/help_text_page_number"
+        android:textSize="28sp"/>
+    <TextView
+        android:id="@+id/help_screen_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="@string/help_text_one"
+        android:textSize="32sp"/>
+    <ImageView
+        android:id="@+id/help_screen_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:contentDescription="@string/help_image_description"
+        android:src="@drawable/help_1"/>
+</LinearLayout>

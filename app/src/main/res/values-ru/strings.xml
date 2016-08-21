@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">Gamblines</string>
+    <string name="score_text">Счет</string>
+    <string name="best_score_text">Рекорд: %1$d</string>
+    <string name="sound_change_text">Звук %1$s</string>
+    <string name="on_text">ВКЛ</string>
+    <string name="off_text">ВЫКЛ</string>
+    <string name="easy_text">Легкая</string>
+    <string name="normal_text">Обычная</string>
+    <string name="hard_text">Тяжелая</string>
+    <string name="normal_field_text">Обычное</string>
+    <string name="hard_field_text">Сложное</string>
+    <string name="classic_text">Кубики</string>
+    <string name="numbers_text">Цифры</string>
+    <!--пункты меню-->
+    <string name="menu_new_game_text">Новая игра</string>
+    <string name="menu_undo_text">Отменить ход</string>
+    <string name="menu_more_text">Еще</string>
+    <string name="menu_help_text">Как играть</string>
+    <string name="menu_sound_text">Звук: %1$s</string>
+    <string name="menu_field_text">Поле: %1$s</string>
+    <string name="menu_difficulty_text">Сложность: %1$s</string>
+    <string name="menu_style_text">Стиль: %1$s</string>
+    <string name="menu_show_records_text">Лучшие результаты</string>
+    <string name="menu_close_text">Закрыть</string>
+    <!--диалоговые окна-->
+    <string name="new_game_question">Начать заново?</string>
+    <string name="change_field_mode_question">Изменить режим поля?\nТекущая игра будет потеряна</string>
+    <string name="change_difficulty_question">Начать заново на другой сложности?</string>
+    <string name="best_results_text">Лучшие Результаты</string>
+    <string name="game_over_text">Игра окончена!</string>
+    <string name="wrong_turn">Недопустимый ход!</string>
+    <!--справка-->
+    <string name="help_text_one">Кликните по кубику, чтобы переместить его</string>
+    <string name="help_text_two">Соберите не менее 3 одинаковых кубиков в ряд</string>
+    <string name="help_text_three">Зажмите кубик, чтобы изменить его значение</string>
+    <string name="help_text_page_number">%1$d / 3</string>
+    <string name="help_text_back">Назад</string>
+    <string name="help_text_next">Далее</string>
+    <string name="help_image_description">Изображение справки</string>
+</resources>

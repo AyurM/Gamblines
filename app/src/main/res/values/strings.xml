@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">Gamblines</string>
+    <string name="score_text">Score</string>
+    <string name="best_score_text">Best result: %1$d</string>
+    <string name="sound_change_text">Sound is %1$s</string>
+    <string name="on_text">ON</string>
+    <string name="off_text">OFF</string>
+    <string name="easy_text">Easy</string>
+    <string name="normal_text">Normal</string>
+    <string name="hard_text">Hard</string>
+    <string name="normal_field_text">Normal</string>
+    <string name="hard_field_text">Hard</string>
+    <string name="classic_text">Classic</string>
+    <string name="numbers_text">Numbers</string>
+    <!--пункты меню-->
+    <string name="menu_new_game_text">New Game</string>
+    <string name="menu_undo_text">Undo</string>
+    <string name="menu_more_text">More</string>
+    <string name="menu_help_text">How to play</string>
+    <string name="menu_sound_text">Sound: %1$s</string>
+    <string name="menu_field_text">Field: %1$s</string>
+    <string name="menu_difficulty_text">Difficulty: %1$s</string>
+    <string name="menu_style_text">Dices: %1$s</string>
+    <string name="menu_show_records_text">Best Results</string>
+    <string name="menu_close_text">Close</string>
+    <!--диалоговые окна-->
+    <string name="new_game_question">Start a new game?</string>
+    <string name="change_field_mode_question">Change field mode?\nYour current game will be lost</string>
+    <string name="change_difficulty_question">Start a new game with selected difficulty?</string>
+    <string name="best_results_text">Best Results</string>
+    <string name="game_over_text">Game Over!</string>
+    <string name="wrong_turn">Wrong turn!</string>
+    <!--справка-->
+    <string name="help_text_one">Click on a dice to move it</string>
+    <string name="help_text_two">Collect at least 3 same dices in a row</string>
+    <string name="help_text_three">Long click on a dice to roll it</string>
+    <string name="help_text_page_number">%1$d / 3</string>
+    <string name="help_text_back">Back</string>
+    <string name="help_text_next">Next</string>
+    <string name="help_image_description">Help image</string>
+</resources>

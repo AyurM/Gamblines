@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#3F51B5</color>
+
+    <color name="background">#f5f5eb</color>
+    <color name="backgroundRectangle">#a6a69f</color>
+
+    <color name="whiteText">#ffffff</color>
+    <color name="easyText">#259929</color>
+    <color name="normalText">#2c82f2</color>
+    <color name="hardText">#b917cf</color>
+    <color name="scoreBackground">#96a3a3</color>
+</resources>
