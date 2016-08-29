@@ -535,7 +535,7 @@ public class GamblesView extends View{
                                     List<int[]> winIndices = new ArrayList<>();
                                     //если кубик действительно был перемещен
                                     if(diceMoved){
-                                        winIndices = mDiceField.checkField();   //проверить совпадения кубиков
+                                        winIndices = mDiceField.findMatchingDices(position);    //проверить совпадения кубиков
                                         mScoreGained = mDiceField.removeWinIndices(winIndices, position, true, true); //обновить очки
                                         mScore += mScoreGained;
                                         saveBestScore();     //обновить сведения о рекорде очков
@@ -573,7 +573,7 @@ public class GamblesView extends View{
                         if(verifyPosition(position) && Arrays.equals(mDownPosition, position)){
                             if(mDiceField.changeDice(position)){    //меняем случайным образом значение кубика
                                 mPrevScore = mScore; //обновить сведения об очках на случай отмены хода
-                                List<int[]> winIndices = mDiceField.checkField();   //проверить совпадения кубиков
+                                List<int[]> winIndices = mDiceField.findMatchingDices(position);   //проверить совпадения кубиков
                                 mScoreGained = mDiceField.removeWinIndices(winIndices, position, true, false);   //обновить очки
                                 mScore += mScoreGained;
                                 saveBestScore();    //обновить сведения о рекорде очков
