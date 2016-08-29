@@ -214,10 +214,12 @@ public class DiceField{
      * @param value значение кубика
      * @param afterMove true, если обработка выполняется после перемещения кубика; false - если
      *                  после изменения кубика
+     * @return список координат созданных кубиков
      */
-    private void generateNewDice(int value, boolean afterMove){
+    private List<int[]> generateNewDice(int value, boolean afterMove){
+        List<int[]> generatedIndices = new ArrayList<>();
         if(value == 0){
-            return;
+            return generatedIndices;
         }
         //количество появляющихся кубиков зависит от текущей сложности игры
         int dicesToSpawn;
@@ -234,105 +236,125 @@ public class DiceField{
         }
         //создать нужное кол-во кубиков
         for(int i = 0; i < dicesToSpawn; i++){
-            int[] newIndices = generateRandomCoordinates();  //получить случайные координаты для создания кубика
+            int[] newIndices = generateRandomCoordinates();    //получить случайные координаты для создания кубика
             if(newIndices[0] != -1){
-                randomize(newIndices);   //задать случайное значение для кубика
+                randomize(newIndices);    //задать случайное значение для кубика
                 mCellsDrawables[newIndices[0]][newIndices[1]] = findDiceDrawable(mDices[newIndices[0]][newIndices[1]], newIndices[0], newIndices[1]); //обновить рисунок кубика
+                generatedIndices.add(new int[]{newIndices[0], newIndices[1]});    //добавить полученные координаты в возвращаемый список
                 GamblesAnimation.animateDiceSpawning(newIndices, mCellsDrawables, mGView,
                         mGAListener);    //анимация появления кубика
                 if(mFreeCells.isEmpty()){
-                    return;    //прекратить генерацию новых кубиков, если на поле не осталось места
+                    break;    //прекратить генерацию новых кубиков, если на поле не осталось места
                 }
             }
         }
+        return generatedIndices;
     }
 
     /**
-     * Выполняет поиск совпадающих кубиков на игровом поле
-     * @return список найденных совпадений
+     * Находит совпадающие кубики для заданной клетки
+     * @param position координаты проверяемой клетки
+     * @return список координат совпавших кубиков, которые подлежат удалению (результативный ход)
      */
-    public List<int[]> checkField(){
-        List<int[]> winIndices = new ArrayList<>();
-        //просмотреть игровое поле в поисках совпадений
-        for(int i = 0; i < FIELD_SIZE; i++){
-            for(int j = 0; j < FIELD_SIZE; j++){
-                List<int[]> currIndices;
-                currIndices = checkDice(mDices[i][j], i, j);    //выполнить поиск совпадений для данной клетки
-                //если совпадения найдены, добавить их в возвращаемый список
-                if(!winIndices.isEmpty()){    //если на данном ходу уже были найдены совпавшие клетки
-                    for(int[] idxToAdd : currIndices){
-                        boolean newIdx = true;
-                        for(int[] existingIdx : winIndices){
-                            if(Arrays.equals(idxToAdd, existingIdx)){    //убедиться в отсутствии повторяющихся клеток
-                                newIdx = false;
-                                break;
-                            }
+    public List<int[]> findMatchingDices(int[] position){
+        List<int[]> matchingDices = new ArrayList<>();
+        int x = position[0], y = position[1];
+        int dice = mDices[x][y];
+        //обрабатываются только ненулевые кубики
+        if(dice == 0){
+            return matchingDices;
+        }
+        boolean thisDiceAdded = false;
+        int[] index;    //координаты проверяемой позиции
+        //поиск совпадений в 4 направлениях: 0 = |, 1 = -, 2 = \, 3 = /
+        for(int direction = 0; direction < 4; direction++){
+            List<int[]> currentDices = new ArrayList<>();    //список координат совпадающих фишек для данного направления
+            for(int i = -1; i <= 1; i += 2){
+                boolean matchNotFound = false;
+                int j = i;
+                while(!matchNotFound){
+                    try{
+                        index = computePositionToCheck(direction, x, y, j);    //вычислить координаты для данного шага проверки
+                        if(mDices[index[0]][index[1]] == dice){
+                            currentDices.add(new int[]{index[0], index[1]});    //найдено совпадение, запомнить его координаты
+                            j += i;
+                        } else {
+                            matchNotFound = true;    //прервать текущий этап проверки, если клетка отличается от исходной
                         }
-                        if(newIdx){
-                            winIndices.add(idxToAdd);
-                        }
+                    } catch (IndexOutOfBoundsException e){
+                        break;    //прервать текущий этап проверки при выходе за границы поля
                     }
-                } else {
-                    winIndices.addAll(currIndices);    //если других совпавших клеток нет
                 }
             }
+
+            if(!currentDices.isEmpty() && currentDices.size() < sDicesToCollect - 1){
+                //очистить список, если совпавших клеток недостаточно
+                currentDices.clear();
+            } else if(currentDices.size() >= sDicesToCollect - 1){
+                //если совпадения найдены
+                if(!thisDiceAdded){
+                    //добавить координаты текущей клетки, если они еще не добавлены
+                    currentDices.add(new int[]{x, y});
+                    thisDiceAdded = true;
+                }
+                matchingDices.addAll(currentDices);
+            }
+            currentDices.clear();    //сбросить промежуточный список
         }
-        return winIndices;
+        return matchingDices;
     }
 
     /**
-     * Выполняет поиск совпадающих кубиков для данной клетки
-     * @param dice текущая клетка
-     * @param x номер строки для данной клетки
-     * @param y номер столбца для данной клетки
-     * @return список позиций кубиков, совпадающих с текущим (необходимо превысить порог
-     * sDicesToCollect)
+     * Находит совпадающие кубики для нескольких клеток. Используется при
+     * перепроверке совпадений после генерации новых кубиков, которых на повышенных сложностях
+     * может быть больше одного.
+     * @param indices список координат проверяемых клеток
+     * @return список координат совпавших кубиков, которые подлежат удалению (результативный ход)
      */
-    private List<int[]> checkDice(int dice, int x, int y){
-        List<int[]> winIndices = new ArrayList<>();
-        //рассматриваются только ненулевые кубики
-        if(dice != 0){
-            int dicesVertical = 1, dicesHorizontal = 1;
-            //поиск совпадающих кубиков в вертикальном направлении (вниз)
-            for(int i = 1; i < FIELD_SIZE - x; i++){
-                try{
-                    if(mDices[x + i][y] == dice){
-                        dicesVertical++;
-                    } else {
-                        break;
-                    }
-                } catch (IndexOutOfBoundsException exc){
-                    break;
-                }
-            }
-            //поиск совпадающих кубиков в горизонтальном направлении (вправо)
-            for(int i = 1; i < FIELD_SIZE - y; i++){
-                try{
-                    if(mDices[x][y + i] == dice){
-                        dicesHorizontal++;
-                    } else {
-                        break;
-                    }
-                } catch (IndexOutOfBoundsException exc){
-                    break;
-                }
-            }
-            //обработка результатов поиска
-            if(dicesVertical >= sDicesToCollect){
-                for(int i = 0; i < dicesVertical; i++){
-                    int[] currIdx = {x + i, y};
-                    winIndices.add(currIdx);
-                }
-            }
-            if(dicesHorizontal >= sDicesToCollect){
-                //не добавлять стартовую клетку еще раз, если есть совпадения в вертикальном направлении
-                for(int i = dicesVertical >= sDicesToCollect ? 1 : 0 ; i < dicesHorizontal; i++){
-                    int[] currIdx = {x, y + i};
-                    winIndices.add(currIdx);
-                }
-            }
+    private List<int[]> findMatchingDices(List<int[]> indices){
+        List<int[]> matchingDices = new ArrayList<>();
+        if(indices.isEmpty()){
+            return matchingDices;
         }
-        return winIndices;
+        for(int i = 0; i < indices.size(); i++){
+            matchingDices.addAll(findMatchingDices(indices.get(i)));
+        }
+        return matchingDices;
+    }
+
+    /**
+     * Рассчитывает координаты проверяемой клетки для метода findMatchingDices()
+     * @param direction направление проверки
+     * @param x номер строки для клетки, запустившей проверку на совпадения
+     * @param y номер столбца для клетки, запустившей проверку на совпадения
+     * @param i номер шага проверки
+     * @return координаты клетки, подлежащей проверке на совпадение
+     */
+    private int[] computePositionToCheck(int direction, int x, int y, int i){
+        int[] position = new int[2];
+        switch (direction){
+            case 0:
+                //вертикальное направление поиска |
+                position[0] = x + i;
+                position[1] = y;
+                break;
+            case 1:
+                //горизонтальное направление поиска -
+                position[0] = x;
+                position[1] = y + i;
+                break;
+            case 2:
+                //направление поиска - по диагонали слева направо и сверху вниз \
+                position[0] = x + i;
+                position[1] = y + i;
+                break;
+            default:
+                //направление поиска - по диагонали слева направо и снизу вверх /
+                position[0] = x - i;
+                position[1] = y + i;
+                break;
+        }
+        return position;
     }
 
     /**
@@ -350,10 +372,11 @@ public class DiceField{
         if(winIndices.isEmpty()){
             //новый кубик добавляется, только если было изменение на поле
             if(diceMoved){
-                generateNewDice(mDices[newPosition[0]][newPosition[1]], afterMove); //добавить на поле новый кубик
+                List<int[]> newIndices = generateNewDice(mDices[newPosition[0]][newPosition[1]],
+                        afterMove); //добавить на поле новый кубик(и) и получить их координаты
                 /*последовательность совпадающих кубиков может появиться и после хода,
                 в результате появления нового кубика*/
-                List<int[]> secondIdxCheck = checkField();    //после добавления кубика проверить совпадения еще раз
+                List<int[]> secondIdxCheck = findMatchingDices(newIndices);    //после добавления кубика проверить совпадения еще раз
                 if(!secondIdxCheck.isEmpty()){
                     score = removeWinIndices(secondIdxCheck, newPosition, false, afterMove); //убрать совпавшие кубики
                     winIndices.addAll(secondIdxCheck);    //обновить сведения о кубиках, подлежащих удалению
