@@ -332,25 +332,25 @@ public class DiceField{
     /**
      * Убирает совпавшие кубики с поля, если таковые имеются
      * @param winIndices позиции совпавших кубиков (совпавших кубиков может не быть)
-     * @param newPosition конечная позиция хода
+     * @param position конечная позиция хода
      * @param diceMoved true, если положение/значение кубиков на поле действительно изменились
      * @param afterMove true, если обработка выполняется после перемещения кубика; false - если
      *                  после изменения кубика
      * @return количество очков, заработанных на данном ходу
      */
-    public int removeWinIndices(List<int[]> winIndices, int[] newPosition, boolean diceMoved, boolean afterMove){
+    public int removeWinIndices(List<int[]> winIndices, int[] position, boolean diceMoved, boolean afterMove){
         int score = 0;
         //после хода не было найдено совпадающих кубиков
         if(winIndices.isEmpty()){
             //новый кубик добавляется, только если было изменение на поле
             if(diceMoved){
-                List<int[]> newIndices = generateNewDice(mDices[newPosition[0]][newPosition[1]],
+                List<int[]> newIndices = generateNewDice(mDices[position[0]][position[1]],
                         afterMove); //добавить на поле новый кубик(и) и получить их координаты
                 /*последовательность совпадающих кубиков может появиться и после хода,
                 в результате появления нового кубика*/
                 List<int[]> secondIdxCheck = findMatchingDices(newIndices);    //после добавления кубика проверить совпадения еще раз
                 if(!secondIdxCheck.isEmpty()){
-                    score = removeWinIndices(secondIdxCheck, newPosition, false, afterMove); //убрать совпавшие кубики
+                    score = removeWinIndices(secondIdxCheck, position, false, afterMove); //убрать совпавшие кубики
                     winIndices.addAll(secondIdxCheck);    //обновить сведения о кубиках, подлежащих удалению
                 }
                 checkGameOver();    //проверка условия гейм-овера
@@ -362,7 +362,7 @@ public class DiceField{
             int[] currIdx = winIndices.get(i);
             score += mDices[currIdx[0]][currIdx[1]];    //подсчитать очки
             mDices[currIdx[0]][currIdx[1]] = 0;         //убрать совпадающие кубики
-            mFreeCells.add(currIdx);                    //обновить список свободных клеток
+            mFreeCells.add(new int[]{currIdx[0], currIdx[1]});    //обновить список свободных клеток
         }
         //нельзя допустить, чтобы на поле не осталось ни одного кубика
         if(mFreeCells.size() == FIELD_SIZE * FIELD_SIZE){
@@ -588,6 +588,14 @@ public class DiceField{
         for(int i = 0; i < sDicesAtStart; i++){
             int[] indices = generateRandomCoordinates();    //генерация случайных координат клетки
             randomize(indices);    //задаем случайное стартовое значение для кубика
+            //среди стартовых кубиков не должно быть совпадающей комбинации
+            if(i >= sDicesToCollect - 1){
+                List<int[]> checkStartingDices = findMatchingDices(indices);
+                while (!checkStartingDices.isEmpty()){
+                    randomize(indices);
+                    checkStartingDices = findMatchingDices(indices);
+                }
+            }
         }
     }
 
