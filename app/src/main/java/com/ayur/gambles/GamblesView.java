@@ -493,6 +493,7 @@ public class GamblesView extends View{
         private float mX, mY;
         private float mDownX, mDownY;
         private int[] mDownPosition = new int[2];
+        private int[] mPosition = new int[2];
         private static final int sLongClickThreshold = 250;    //порог для распознавания долгого нажатия, мс
         private long mDownTime = 0;  //время нажатия
         private long mUpTime = 0;    //время отжатия
@@ -519,28 +520,28 @@ public class GamblesView extends View{
                 case MotionEvent.ACTION_UP:
                     mX = event.getX();    //координаты точки отжатия
                     mY = event.getY();
-                    int[] position = findCellPosition(mX, mY);    //находим позицию кубика на поле по координатам касания
+                    mPosition = findCellPosition(mX, mY);    //находим позицию кубика на поле по координатам касания
                     mUpTime = event.getEventTime();    //получаем время отжатия
                     //одиночное касание используется для перемещения кубика
                     if(Math.abs(mUpTime - mDownTime) < sLongClickThreshold){
-                        if(verifyPosition(position)){
+                        if(verifyPosition(mPosition)){
                             if(mDiceMoveTriggered){    //вторая фаза перемещения кубика
-                                mDiceField.prepareCellsToHighlight(mCellsToHighlight, position, true);    //убрать подсветку клеток
+                                mDiceField.prepareCellsToHighlight(mCellsToHighlight, mPosition, true);    //убрать подсветку клеток
                                 //кубик перемещается только на пустые клетки (или выполнен клик по той же самой клетке)
-                                if(mDiceField.getDices()[position[0]][position[1]] == 0 ||
-                                        Arrays.equals(mMovingDicePosition, position)){
+                                if(mDiceField.getDices()[mPosition[0]][mPosition[1]] == 0 ||
+                                        Arrays.equals(mMovingDicePosition, mPosition)){
                                     mPrevScore = mScore; //обновить сведения об очках на случай отмены хода
                                     //обработать перемещение кубика
-                                    boolean diceMoved = mDiceField.moveDice(mMovingDicePosition, position, mCellsToHighlight, getContext());
+                                    boolean diceMoved = mDiceField.moveDice(mMovingDicePosition, mPosition, mCellsToHighlight, getContext());
                                     List<int[]> winIndices = new ArrayList<>();
                                     //если кубик действительно был перемещен
                                     if(diceMoved){
-                                        winIndices = mDiceField.findMatchingDices(position);    //проверить совпадения кубиков
-                                        mScoreGained = mDiceField.removeWinIndices(winIndices, position, true, true); //обновить очки
+                                        winIndices = mDiceField.findMatchingDices(mPosition);    //проверить совпадения кубиков
+                                        mScoreGained = mDiceField.removeWinIndices(winIndices, mPosition, true, true); //обновить очки
                                         mScore += mScoreGained;
                                         saveBestScore();     //обновить сведения о рекорде очков
                                         //если произошло перемещение кубика, настроить порядок отрисовки клеток
-                                        adjustDrawingOrder(mMovingDicePosition, position);
+                                        adjustDrawingOrder(mMovingDicePosition, mPosition);
                                         if(soundIsOn){
                                             if(mScoreGained > 0){
                                                 mDeleteSound.start();    //звук исчезновения кубиков
@@ -549,7 +550,7 @@ public class GamblesView extends View{
                                             }
                                         }
                                     }
-                                    GamblesAnimation.animateTurn(mMovingDicePosition, position, winIndices, diceMoved,
+                                    GamblesAnimation.animateTurn(mMovingDicePosition, mPosition, winIndices, diceMoved,
                                             mCellsDrawable, mGamblesView, mDiceField.getGAListener()); //воспроизвести анимацию
                                     if(!diceMoved){
                                     /*если перемещения кубика не было, сбросить информацию о ходе,
@@ -560,21 +561,21 @@ public class GamblesView extends View{
                                     }
                                     invalidate();
                                 } else {
-                                    selectDice(position);    //сменить перемещаемый кубик
+                                    selectDice(mPosition);    //сменить перемещаемый кубик
                                 }
                             } else {
-                                selectDice(position);    //1 фаза хода, выбор кубика для перемещения
+                                selectDice(mPosition);    //1 фаза хода, выбор кубика для перемещения
                             }
                         } else {
                             animateUnusualDiceReleasing();     //анимация отжатия кубика
                         }
                     } else {
                         //долгое нажатие позволяет изменить значение кубика
-                        if(verifyPosition(position) && Arrays.equals(mDownPosition, position)){
-                            if(mDiceField.changeDice(position)){    //меняем случайным образом значение кубика
+                        if(verifyPosition(mPosition) && Arrays.equals(mDownPosition, mPosition)){
+                            if(mDiceField.changeDice(mPosition)){    //меняем случайным образом значение кубика
                                 mPrevScore = mScore; //обновить сведения об очках на случай отмены хода
-                                List<int[]> winIndices = mDiceField.findMatchingDices(position);   //проверить совпадения кубиков
-                                mScoreGained = mDiceField.removeWinIndices(winIndices, position, true, false);   //обновить очки
+                                List<int[]> winIndices = mDiceField.findMatchingDices(mPosition);   //проверить совпадения кубиков
+                                mScoreGained = mDiceField.removeWinIndices(winIndices, mPosition, true, false);   //обновить очки
                                 mScore += mScoreGained;
                                 saveBestScore();    //обновить сведения о рекорде очков
                                 if(soundIsOn){
@@ -584,12 +585,12 @@ public class GamblesView extends View{
                                         mChangeSound.start();    //звук изменения кубика
                                     }
                                 }
-                                GamblesAnimation.animateTurn(position, winIndices, mCellsDrawable, mGamblesView,
+                                GamblesAnimation.animateTurn(mPosition, winIndices, mCellsDrawable, mGamblesView,
                                         mDiceField.getGAListener());    //воспроизвести анимацию
                                 GamblesAnimation.animateDiceReleasing(mDownPosition, mCellsDrawable, mGamblesView,
                                         mDiceField.getGAListener());    //анимация отжатия кубика
                                 //убрать подсветку клеток
-                                mDiceField.prepareCellsToHighlight(mCellsToHighlight, position, true);
+                                mDiceField.prepareCellsToHighlight(mCellsToHighlight, mPosition, true);
                                 resetMoveInfo();    //сброс сведений о перемещении
                                 invalidate();
                                 if(!soundIsOn){
@@ -610,11 +611,11 @@ public class GamblesView extends View{
          * @param position позиция выбираемого кубика
          */
         private void selectDice(int[] position){
-            mMovingDicePosition = position;
+            mMovingDicePosition = new int[]{position[0], position[1]};
             //определить номера клеток, которые нужно подсветить
-            mCellsToHighlight = mDiceField.calculateCellsToHighlight(position);
+            mCellsToHighlight = mDiceField.calculateCellsToHighlight(mMovingDicePosition);
             //задать рисунок для подсвечиваемых клеток
-            mDiceField.prepareCellsToHighlight(mCellsToHighlight, position, false);
+            mDiceField.prepareCellsToHighlight(mCellsToHighlight, mMovingDicePosition, false);
             GamblesAnimation.animateDiceReleasing(mDownPosition, mCellsDrawable, mGamblesView,
                     mDiceField.getGAListener());    //анимация отжатия кубика
             if(mCellsToHighlight.isEmpty()){    //если ходить некуда, сбросить сведения о ходе

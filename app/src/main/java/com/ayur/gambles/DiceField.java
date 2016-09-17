@@ -73,6 +73,48 @@ public class DiceField{
     }
 
     /**
+     * Создает случайным образом новые кубики на поле
+     * @param value значение кубика
+     * @param afterMove true, если обработка выполняется после перемещения кубика; false - если
+     *                  после изменения кубика
+     * @return список координат созданных кубиков
+     */
+    private List<int[]> generateNewDice(int value, boolean afterMove){
+        List<int[]> generatedIndices = new ArrayList<>();
+        if(value == 0){
+            return generatedIndices;
+        }
+        //количество появляющихся кубиков зависит от текущей сложности игры
+        int dicesToSpawn;
+        switch (mDifficulty){
+            case 1:
+                //на нормальной сложности: 2 кубика после перемещения, 1 после изменения
+                dicesToSpawn = afterMove ? 2 : 1;
+                break;
+            case 2:
+                dicesToSpawn = 2;   //на тяжелой: всегда появляются 2 кубика
+                break;
+            default:
+                dicesToSpawn = 1;   //на легкой: всегда появляется 1 кубик
+        }
+        //создать нужное кол-во кубиков
+        for(int i = 0; i < dicesToSpawn; i++){
+            int[] newIndices = generateRandomCoordinates();    //получить случайные координаты для создания кубика
+            if(newIndices[0] != -1){
+                randomize(newIndices);    //задать случайное значение для кубика
+                mCellsDrawables[newIndices[0]][newIndices[1]] = findDiceDrawable(mDices[newIndices[0]][newIndices[1]], newIndices[0], newIndices[1]); //обновить рисунок кубика
+                generatedIndices.add(new int[]{newIndices[0], newIndices[1]});    //добавить полученные координаты в возвращаемый список
+                GamblesAnimation.animateDiceSpawning(newIndices, mCellsDrawables, mGView,
+                        mGAListener);    //анимация появления кубика
+                if(mFreeCells.isEmpty()){
+                    break;    //прекратить генерацию новых кубиков, если на поле не осталось места
+                }
+            }
+        }
+        return generatedIndices;
+    }
+
+    /**
      * Присваивает кубику случайное значение
      * @param position позиция изменяемого кубика
      */
@@ -180,48 +222,6 @@ public class DiceField{
             }
         }
         return endPosIsFree;
-    }
-
-    /**
-     * Создает случайным образом новые кубики на поле
-     * @param value значение кубика
-     * @param afterMove true, если обработка выполняется после перемещения кубика; false - если
-     *                  после изменения кубика
-     * @return список координат созданных кубиков
-     */
-    private List<int[]> generateNewDice(int value, boolean afterMove){
-        List<int[]> generatedIndices = new ArrayList<>();
-        if(value == 0){
-            return generatedIndices;
-        }
-        //количество появляющихся кубиков зависит от текущей сложности игры
-        int dicesToSpawn;
-        switch (mDifficulty){
-            case 1:
-                //на нормальной сложности: 2 кубика после перемещения, 1 после изменения
-                dicesToSpawn = afterMove ? 2 : 1;
-                break;
-            case 2:
-                dicesToSpawn = 2;   //на тяжелой: всегда появляются 2 кубика
-                break;
-            default:
-                dicesToSpawn = 1;   //на легкой: всегда появляется 1 кубик
-        }
-        //создать нужное кол-во кубиков
-        for(int i = 0; i < dicesToSpawn; i++){
-            int[] newIndices = generateRandomCoordinates();    //получить случайные координаты для создания кубика
-            if(newIndices[0] != -1){
-                randomize(newIndices);    //задать случайное значение для кубика
-                mCellsDrawables[newIndices[0]][newIndices[1]] = findDiceDrawable(mDices[newIndices[0]][newIndices[1]], newIndices[0], newIndices[1]); //обновить рисунок кубика
-                generatedIndices.add(new int[]{newIndices[0], newIndices[1]});    //добавить полученные координаты в возвращаемый список
-                GamblesAnimation.animateDiceSpawning(newIndices, mCellsDrawables, mGView,
-                        mGAListener);    //анимация появления кубика
-                if(mFreeCells.isEmpty()){
-                    break;    //прекратить генерацию новых кубиков, если на поле не осталось места
-                }
-            }
-        }
-        return generatedIndices;
     }
 
     /**
